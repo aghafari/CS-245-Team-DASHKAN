@@ -27,6 +27,15 @@ public class MyPanel extends JPanel
     {
         super.paintComponent(g);
         
-        g.drawString("CS 245 Quarter Project", 10, 20);
+        Font font = new Font("Times New Roman", Font.BOLD, 36);
+        Graphics2D g2 = (Graphics2D)g;
+        g2.setFont(font);
+        g2.setColor(Color.WHITE);
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.drawString("CS 245 Quarter Project", 100, 50);
+        
+        Font font2 = new Font("Times New Roman", Font.BOLD, 24);
+        g2.setFont(font2);
+        g2.drawString("By: Team Dashkan", 190, 350);
     }
 }
