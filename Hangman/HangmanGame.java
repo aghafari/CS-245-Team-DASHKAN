@@ -37,13 +37,6 @@ import java.util.Scanner;
  */
 public class HangmanGame {
     
-    private static JFrame f; //holds all the panels
-    private static final String[] letters = 
-        {"A", "B", "C", "D", "E", "F",
-        "G", "H", "I", "J", "K", "L",
-        "M", "N", "O", "P", "Q", "R",
-        "S", "T", "U", "V", "W", "X",
-        "Y", "Z"}; //to make the letter buttons
     private static String[] colors = 
         {"RED", "YELLOW", "GREEN", 
          "BLUE", "PURPLE"
@@ -69,9 +62,9 @@ public class HangmanGame {
     //method: createAndShowGUI
     //purpose: To intialize the JFrame and display the title screen
     //for 3 seconds. Then switch over to the options screen.
-    private static void createAndShowGUI() {
+    private static void createAndShowGUI(HangmanGame hg) {
         //intialize the JFrame and set it to close on exit
-        f = new JFrame("Hangman Game");
+        JFrame f = new JFrame("Hangman Game");
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         
         //create a new title screen and add to the JFrame
@@ -83,13 +76,12 @@ public class HangmanGame {
         
         //create an ActionListener for the 3 second title screen timer.
         ActionListener closeScreen;
-        closeScreen = new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                //after 3 seconds clear the frame and go to
-                //options screen
-                f.remove(screen); 
-                presentOptions();
-            }
+        closeScreen = (ActionEvent e) -> {
+            //after 3 seconds clear the frame and go to
+            //options screen
+            screen.removeAll();
+            screen.setVisible(false);
+            hg.presentOptions(f);
         };
         
         //create and start the 3 second timer and set it
@@ -102,7 +94,7 @@ public class HangmanGame {
     //method: presentOptions
     //purpose: To put a panel on the JFrame to allow the user to
     //navigate to the various option of the GUI.
-    private static void presentOptions() {
+    private void presentOptions(JFrame f) {
         //create and add a new option screen panel
         OptionScreen options = new OptionScreen();
         f.add(options);
@@ -124,44 +116,32 @@ public class HangmanGame {
         
         //add mouse listeners to the buttons to know if the user
         //clicked on a given option.
-        game.addMouseListener(new MouseListener() {
+        game.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 //remove the options panel and go
                 //to the game screen
-                f.remove(options);
-                playGame();
+                options.removeAll();
+                options.setVisible(false);
+                playGame(f);
             }
-                    
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {} 
         });
                 
-        scoresButton.addMouseListener(new MouseListener() {
+        scoresButton.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 //clear the frame and display the scores
-                f.remove(options);
-                getScores();
+                options.removeAll();
+                options.setVisible(false);
+                getScores(f);
             }
-                    
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {} 
             });
                 
-        credits.addMouseListener(new MouseListener() {
+        credits.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 //clear the screen and display the credits
-                f.remove(options);
-                getCredits();
+                options.removeAll();
+                options.setVisible(false);
+                getCredits(f);
             }
-                    
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {} 
             });
         
         //update the frame with the new panel
@@ -172,10 +152,12 @@ public class HangmanGame {
     //purpose: To create a panel for the user to play the hangman
     //game with. It also keeps track of the date and updates every
     //second. 
-    private static void playGame() {
+    private void playGame(JFrame f) {
         //create a new game screen panel
         GameScreen gs = new GameScreen();
         
+        //get the letters
+        String[] letters = gs.getLetters();
         //get the random word
         selectedWord = gs.getWord();
         //create the outline for the word
@@ -218,8 +200,9 @@ public class HangmanGame {
                       //if max wrong guesses is reached
                       if(wrongGuesses == 6) {
                           //remove the panel and go to end screen
-                          f.remove(gs);
-                          playGame2();
+                          gs.removeAll();
+                          gs.setVisible(false);
+                          playGame2(f);
                       }
                     } else {
                       //if the letter is present, check if the word has
@@ -235,8 +218,9 @@ public class HangmanGame {
                       //if the word has been guessed
                       if (wordGuessed) {
                           //remove the panel and display the score
-                          f.remove(gs);
-                          playGame2();
+                          gs.removeAll();
+                          gs.setVisible(false);
+                          playGame2(f);
                       }
                     }
                 }
@@ -259,19 +243,15 @@ public class HangmanGame {
         
         //Button to execute the skip function
         JButton skip = new JButton("SKIP");
-        skip.addMouseListener(new MouseListener() {
+        skip.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 //if clicked, remove the panel and
                 //display a score of 0
-                f.remove(gs);
+                gs.removeAll();
+                gs.setVisible(false);
                 score = 0;
-                playGame2();
+                playGame2(f);
             }
-                    
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
         });
         //add skip button
         gs.add(skip);
@@ -304,7 +284,7 @@ public class HangmanGame {
     //method: getAreaToPlace
     //purpose: To give the bounds to place the buttons for the
     //second game. 
-    private static Rectangle getAreaToPlace(int n) {
+    private Rectangle getAreaToPlace(int n) {
         switch(n) {
             case 0:
                 //first button location
@@ -330,7 +310,7 @@ public class HangmanGame {
     //purpose: To determine whether a random number was already 
     //used to color a button in the button game. This ensures
     //that no color is chosen twice.
-    private static boolean checkIfUsed(int n) {
+    private boolean checkIfUsed(int n) {
         //go through all the values in the usedValues array
         for (int i = 0; i < usedValues.length; i++) {
             //if any number is present return true
@@ -346,7 +326,7 @@ public class HangmanGame {
     //purpose: To create a panel for the user to play the colored
     //button game with. The date is displayed and updated each 
     //second. It is played directly after the hangman game.
-    private static void playGame2() {
+    private void playGame2(JFrame f) {
         //create a new seccond game screen and add it to the frame
         GameScreen2 gs2 = new GameScreen2();
         f.add(gs2);
@@ -426,7 +406,7 @@ public class HangmanGame {
             //set the button in the determined area
             cb.setBounds(getAreaToPlace(i));
             //add a mouse listener to the button
-            cb.addMouseListener(new MouseListener() {
+            cb.addMouseListener(new MouseAdapter() {
                 //when the mouse enters the button, highlight it
                 public void mouseEntered(MouseEvent e) {
                     cb.highlight();
@@ -463,13 +443,11 @@ public class HangmanGame {
                     rounds++;
                     //once 5 rounds are played, go the game over screen
                     if (rounds == 5) {
-                        f.remove(gs2);
-                        getGameEnd(score);
+                          gs2.removeAll();
+                          gs2.setVisible(false);
+                        getGameEnd(score, f);
                     }
-                }
-            
-                public void mousePressed(MouseEvent e) {}
-                public void mouseReleased(MouseEvent e) {}            
+                }         
             });
             //add the color button
             gs2.add(cb);
@@ -483,7 +461,7 @@ public class HangmanGame {
     //purpose: To display the game over screen to the user and give
     //the final score. It takes an integer value which is the score
     //calculated in the playGame method.
-    private static void getGameEnd(int n) {   
+    private void getGameEnd(int n, JFrame f) {   
         //create a new endscreen panel and add it to the frame
         EndScreen es = new EndScreen(n);
         f.add(es);        
@@ -494,26 +472,22 @@ public class HangmanGame {
         es.setLayout(null);
         end.setBounds(500, 300, 60, 40);
         //add a mouse listener to the button
-        end.addMouseListener(new MouseListener() {
+        end.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 //remove the end screen
-                f.remove(es);
+                es.removeAll();
+                es.setVisible(false);
                 //check if the score is a new high score
                 int check = checkScores(n);
                 if (check == -1) {
                     //if no new high score go back to menu
-                    presentOptions();
+                    presentOptions(f);
                 } else {
                     //if the score is high enough, get the
                     //player's initials
-                    getInitials(check);
+                    getInitials(check, f);
                 }
             }
-                    
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
         });
         //add the end button to the panel
         es.add(end);
@@ -549,7 +523,7 @@ public class HangmanGame {
     //purpose: Get the user's initials if they achieve a new high 
     //score. The value it takes it the index to place the new name
     //in the name list.
-    private static void getInitials(int n) {
+    private void getInitials(int n, JFrame f) {
         //create a new high score screen and add it to the frame
         NewHighScoreScreen nhs = new NewHighScoreScreen();
         f.add(nhs);
@@ -565,10 +539,11 @@ public class HangmanGame {
         //create an end button for after the initials are entered
         JButton end = new JButton("END");
         end.setBounds(500, 300, 60, 40);
-        end.addMouseListener(new MouseListener() {
+        end.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 //remove the end screen
-                f.remove(nhs);
+                nhs.removeAll();
+                nhs.setVisible(false);
                 
                 //get the name the user typed in and limit it to 3 characters
                 String name = initials.getText();
@@ -595,13 +570,8 @@ public class HangmanGame {
                 
                 //close the printer and go to the options screen
                 pw.close(); 
-                presentOptions();
+                presentOptions(f);
             }
-                    
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
         });
         //add the end button
         nhs.add(end);        
@@ -612,7 +582,7 @@ public class HangmanGame {
     
     //method: getScores
     //purpose: To display the high scores to the user.
-    private static void getScores() {
+    private void getScores(JFrame f) {
         //create a new high score screen and add it to the frame
         HighScoreScreen hss = new HighScoreScreen(names, scores);
         f.add(hss);
@@ -623,17 +593,13 @@ public class HangmanGame {
         hss.setLayout(null);
         back.setBounds(30, 350, 100, 30);
         //add a mouselistener to the back button
-        back.addMouseListener(new MouseListener() {
+        back.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 //remove the screen and go back to options
                 hss.removeAll();
-                presentOptions();
+                hss.setVisible(false);
+                presentOptions(f);
             }
-                    
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
         });
         //add the back button to the panel
         hss.add(back);
@@ -644,7 +610,7 @@ public class HangmanGame {
     
     //mehtod: getCredits
     //purpose: To display the credits to the user.
-    private static void getCredits() {
+    private void getCredits(JFrame f) {
         //create and add a new credits screen panel
         CreditsScreen cs = new CreditsScreen();
         f.add(cs);
@@ -655,17 +621,13 @@ public class HangmanGame {
         cs.setLayout(null);
         back.setBounds(30, 350, 100, 30);
         //add a mouse listener to the button
-        back.addMouseListener(new MouseListener() {
+        back.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 //remove the panel and go back to options
                 cs.removeAll();
-                presentOptions();
+                cs.setVisible(false);
+                presentOptions(f);
             }
-                    
-            public void mousePressed(MouseEvent e) {}
-            public void mouseReleased(MouseEvent e) {}
-            public void mouseEntered(MouseEvent e) {}
-            public void mouseExited(MouseEvent e) {}
         });
         //add the back button to the panel
         cs.add(back);
@@ -680,55 +642,49 @@ public class HangmanGame {
     //name and high scores array to keep track of high scores
     //after each game is played.
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            public void run() {
-                //initialize the arrays to hold the names
-                //and high scores
-                names = new String[5];
-                scores = new String[5];
-                
-                //create a scanner object to read from the file
-                Scanner sc = null;
-
-                try {
-                    //initialize the scanner with the high scores file
-                    sc = new Scanner(new File("src\\Hangman\\HighScoresRecords"));
-                } catch (IOException e) {            
-                    e.printStackTrace();
-                    System.exit(0);
-                }
-
-                //keep track of the index to place the current name and score
-                int index = 0;
-                //read through the file and put all the scores in the arrays
-                while(sc.hasNext()) {
-                    //read a line from the file
-                    String nextLine = sc.nextLine();
-                    //create string to concatenate the characters from the lines
-                    String name = "", score = "";
-                    //keep track of where the name leaves off
-                    int numberStart = 0;
-                    //until you encounter a space read the characters of the name
-                    for(int i = 0; !Character.isSpaceChar(nextLine.charAt(i)); i++) {
-                        name += nextLine.charAt(i); //add it to the name string
-                        numberStart = i; //set the numberStart to where we are 
-                    }
-
-                    //after reading the name start two characters ahead of where
-                    //it left off to get the score
-                    for(int i = numberStart + 2; i < nextLine.length(); i++) {
-                        score += nextLine.charAt(i); //read score until end of line
-                    }
-
-                    //put the name and score in the respective array
-                    names[index] = name;
-                    scores[index] = score;
-                    index++; //go on to the next index in the array
-                }
-                
-                sc.close(); //close the scanner
-                createAndShowGUI(); //displays the GUI
+        HangmanGame hg = new HangmanGame();
+        SwingUtilities.invokeLater(() -> {
+            //initialize the arrays to hold the names
+            //and high scores
+            names = new String[5];
+            scores = new String[5];
+            //create a scanner object to read from the file
+            Scanner sc = null;
+            try {
+                //initialize the scanner with the high scores file
+                sc = new Scanner(new File("src\\Hangman\\HighScoresRecords"));
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.exit(0);
             }
+            //keep track of the index to place the current name and score
+            int index = 0;
+            //read through the file and put all the scores in the arrays
+            while (sc.hasNext()) {
+                //read a line from the file
+                String nextLine = sc.nextLine();
+                //create string to concatenate the characters from the lines
+                String name = "";
+                String score1 = "";
+                //keep track of where the name leaves off
+                int numberStart = 0;
+                //until you encounter a space read the characters of the name
+                for(int i = 0; !Character.isSpaceChar(nextLine.charAt(i)); i++) {
+                    name += nextLine.charAt(i); //add it to the name string
+                    numberStart = i; //set the numberStart to where we are
+                }
+                //after reading the name start two characters ahead of where
+                //it left off to get the score
+                for (int i = numberStart + 2; i < nextLine.length(); i++) {
+                    score1 += nextLine.charAt(i); //read score until end of line
+                }
+                //put the name and score in the respective array
+                names[index] = name;
+                scores[index] = score1;
+                index++; //go on to the next index in the array
+            }
+            sc.close(); //close the scanner
+            createAndShowGUI(hg); //displays the GUI
         });
     }
 }

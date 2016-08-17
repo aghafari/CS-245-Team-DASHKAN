@@ -22,7 +22,13 @@ import java.util.Random;
  *  JPanel subclass to display the hangman game GUI
  */
 public class GameScreen extends JPanel {
-    
+    //to make the letter buttons
+    private final String[] letters = 
+        {"A", "B", "C", "D", "E", "F",
+        "G", "H", "I", "J", "K", "L",
+        "M", "N", "O", "P", "Q", "R",
+        "S", "T", "U", "V", "W", "X",
+        "Y", "Z"}; 
     //list of possible words
     private final String[] words = 
         {"ABSTRACT", "CEMETERY", "NURSE",
@@ -42,6 +48,12 @@ public class GameScreen extends JPanel {
         wrongGuesses = 0; //set wrong guesses to 0
         score = 100; //set score to 100
     }
+    
+    //method: getLetters
+    //purpose: getter method for the char of letters
+    public String[] getLetters(){
+        return letters;
+    }    
     
     //method: getWord
     //purpose: getter method for the word field
